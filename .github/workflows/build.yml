@@ -67,4 +67,5 @@ jobs:
             allowlist.json
             README.md
             LICENSE
+            docs/
           if-no-files-found: error
