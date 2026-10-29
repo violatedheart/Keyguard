@@ -13,6 +13,28 @@ Python/Windows activity can still create bytecode caches, OS audit records, and
 file-access metadata; a PyInstaller one-file application extracts itself to a
 temporary directory at startup. This is not a forensic zero-write environment.
 
+## Quick start with the Windows executable
+
+Download `KeyGuard-Windows-x64` from a completed successful
+[Windows build](https://github.com/violatedheart/Keyguard/actions/workflows/build.yml).
+GitHub may require sign-in to download workflow artifacts. Extract the ZIP and
+open PowerShell in the folder containing `keyguard.exe` (usually `dist` inside
+the extracted artifact).
+
+![Quick start: scan, inspect a PID from your results, then export HTML; risk levels are Low 0–29, Medium 30–59, High 60–100.](docs/images/quickstart.png)
+
+The commands shown above, ready to copy as single lines:
+
+```powershell
+.\keyguard.exe scan
+.\keyguard.exe inspect 4242
+.\keyguard.exe export --html --output report.html
+```
+
+Replace `4242` with a PID from your own scan. See [Install](#install) to run from
+Python, and [Usage](#usage) for every command. High scores call for investigation;
+a Low score with missing evidence does not establish safety.
+
 ## What it checks
 
 | Module | Evidence |
@@ -25,6 +47,11 @@ temporary directory at startup. This is not a forensic zero-write environment.
 | Behavior | System-name lookalikes, system names outside expected directories, recent process starts, background keyboard imports, and contextual parent anomalies |
 | Allowlist | Verified-publisher product rules and editable user rules pinned to executable path + SHA-256 |
 
+![Architecture: read process, executable, startup, and TCP metadata; combine it with configurable weights and allowlists; report reasons and coverage gaps.](docs/images/architecture.png)
+
+<details>
+<summary>Text version of the architecture diagram</summary>
+
 ```mermaid
 flowchart LR
     OS[Windows process / window snapshot] --> Scan[Scanner]
@@ -36,6 +63,8 @@ flowchart LR
     Score --> CLI[Rich CLI / inspect / watch]
     Score --> Reports[Offline JSON / escaped HTML]
 ```
+
+</details>
 
 Each collector returns a `Detection` containing findings, observations, and
 coverage issues. Its `scored(config["weights"])` view returns the module score,
@@ -50,16 +79,22 @@ from Temp (+20) produce 56/100 Medium before any additional observations. A
 background keyboard combination adds +12, producing High. These are triage
 weights, not calibrated probabilities or a malware classification model.
 
-### Screenshot / GIF placeholders
+### Example output (synthetic data)
 
-> **Screenshot placeholder:** capture `keyguard scan --all` on a test machine,
-> with its permission and coverage notes visible.
->
-> **GIF placeholder:** demonstrate the benign static-import probe, `inspect`, and
-> an HTML export. No production data or actual keystrokes should be shown.
+These terminal illustrations use the actual CLI rendering functions with invented
+processes, paths, and observations. **They are not live Windows scan screenshots**
+and do not describe real software or prove any keylogging activity.
 
-These are the only intentional documentation placeholders; all executable code
-and tests are supplied in full. No screenshots are represented as real scan data.
+![Synthetic scan example: demo-probe.exe scores 71 High and demo-hotkeys.exe scores 56 Medium; the default table hides a third Low process and includes administrator and window-visibility notes.](docs/images/scan-example.png)
+
+`scan` shows Medium/High results by default; `scan --all` includes Low results.
+Read the reasons and coverage notes before deciding what to investigate.
+
+![Synthetic inspect excerpt: PID 4242 scores 71 from keyboard imports +18, no embedded signature +18, Temp location +20, no visible window +3, and background keyboard combination +12.](docs/images/inspect-example.png)
+
+`inspect` explains each weighted signal. The full command continues with JSON
+observations and global coverage notes. See [the image sources and regeneration
+instructions](docs/README.md) for editable SVGs and the synthetic data renderer.
 
 ## Install
 
