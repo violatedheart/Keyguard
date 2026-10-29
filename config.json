@@ -1,0 +1,26 @@
+{
+  "weights": {
+    "keyboard_imports": 18,
+    "unsigned": 18,
+    "invalid_signature": 25,
+    "valid_signature": 0,
+    "microsoft_signed": -20,
+    "trusted_publisher": -12,
+    "suspicious_location": 20,
+    "no_window": 3,
+    "persistence_suspicious": 16,
+    "non_microsoft_service": 4,
+    "keyboard_network": 18,
+    "system_name_mimic": 20,
+    "system_wrong_path": 20,
+    "recent_process": 5,
+    "background_keyboard": 12,
+    "odd_parent": 16,
+    "builtin_allowlist": -25,
+    "user_allowlist": -50
+  },
+  "recent_seconds": 120,
+  "watch_interval_seconds": 30,
+  "max_pe_bytes": 268435456,
+  "trusted_publishers": []
+}

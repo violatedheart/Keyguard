@@ -1,0 +1,6 @@
+include README.md LICENSE config.json allowlist.json requirements.txt requirements-dev.txt run_keyguard.py
+include .gitignore
+recursive-include keyguard/data *.json
+recursive-include tests *.py
+recursive-include examples *.py *.c
+recursive-include .github/workflows *.yml

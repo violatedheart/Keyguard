@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=77.0.3", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "keyguard"
+version = "1.0.0"
+description = "Read-only Windows keylogger-risk triage with explainable scoring"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "KeyGuard contributors"}]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: Microsoft :: Windows :: Windows 10",
+  "Operating System :: Microsoft :: Windows :: Windows 11",
+  "Topic :: Security",
+]
+dependencies = [
+  "psutil>=6.1,<8",
+  "pefile>=2024.8.26",
+  "pywin32>=308; sys_platform == 'win32'",
+  "rich>=13.9,<15",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3,<10", "pytest-cov>=6,<8", "ruff>=0.11,<1", "build>=1.2,<2"]
+build = ["pyinstaller>=6.11,<7"]
+
+[project.scripts]
+keyguard = "keyguard.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["keyguard*"]
+
+[tool.setuptools.package-data]
+"keyguard.data" = ["*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = ["windows: real Windows API smoke tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

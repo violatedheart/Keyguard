@@ -1,0 +1,4 @@
+psutil>=6.1,<8
+pefile>=2024.8.26
+pywin32>=308; sys_platform == "win32"
+rich>=13.9,<15

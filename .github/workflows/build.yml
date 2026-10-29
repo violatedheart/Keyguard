@@ -1,0 +1,70 @@
+name: Windows test and executable
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+      - name: Lint
+        run: python -m ruff check .
+      - name: Unit and native Windows smoke tests
+        run: python -m pytest --cov=keyguard --cov-report=term-missing --cov-report=xml
+
+  build:
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install
+        run: python -m pip install -e ".[build]"
+      - name: Build single console executable
+        run: >-
+          python -m PyInstaller --noconfirm --clean --onefile --console
+          --name keyguard --collect-data keyguard --collect-submodules win32com
+          --hidden-import win32timezone --hidden-import win32gui
+          --hidden-import win32process --hidden-import win32security
+          run_keyguard.py
+      - name: Smoke test frozen resources and real scan
+        shell: pwsh
+        run: |
+          & .\dist\keyguard.exe --version
+          if ($LASTEXITCODE -ne 0) { throw 'Version command failed' }
+          & .\dist\keyguard.exe scan --all
+          if ($LASTEXITCODE -ne 0) { throw 'Frozen scan failed' }
+          & .\dist\keyguard.exe export --json --output frozen-report.json
+          if ($LASTEXITCODE -ne 0) { throw 'Frozen export failed' }
+          $report = Get-Content frozen-report.json -Raw | ConvertFrom-Json
+          if ($report.schema_version -ne 1 -or $report.processes.Count -lt 1) { throw 'Invalid report' }
+      - name: Upload executable and editable defaults
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeyGuard-Windows-x64
+          path: |
+            dist/keyguard.exe
+            config.json
+            allowlist.json
+            README.md
+            LICENSE
+          if-no-files-found: error
